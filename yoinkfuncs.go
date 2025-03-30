@@ -521,3 +521,53 @@ func dbgRawUnMarshPrint(vi version.Info) {
 	fmt.Printf("Unmarshed: %x\n", 	string(unmarshjson))
 
 }
+
+func unsafeDbgExplResType(rs *winres.ResourceSet) {
+
+	rstr := reflect.ValueOf(rs)
+	rstr = reflect.Indirect(rstr)
+	rf := rstr.Field(0)
+
+	if rf.Kind() == reflect.Map {
+		
+		for _, key := range rf.MapKeys() {
+
+			typeEntryPtr := rf.MapIndex(key)
+			if typeEntryPtr.IsValid() && typeEntryPtr.Kind() == reflect.Ptr {
+				typeEntryVal := typeEntryPtr.Elem()
+
+				resourcesField := typeEntryVal.FieldByName("resources")
+				if resourcesField.IsValid() && resourcesField.Kind() == reflect.Map {
+					// Iterate the map specfically
+					for _, resourceKey := range resourcesField.MapKeys() {
+						resourcePtr := resourcesField.MapIndex(resourceKey)
+						if resourcePtr.IsValid() && resourcePtr.Kind() == reflect.Ptr {
+							resourceVal := resourcePtr.Elem()
+
+							dataField := resourceVal.FieldByName("data")
+							if dataField.IsValid() && dataField.Kind() == reflect.Map {
+
+								for _, dataKey := range dataField.MapKeys() {
+									dataPtr := dataField.MapIndex(dataKey)
+									if dataPtr.IsValid() && dataPtr.Kind() == reflect.Ptr {
+										dataVal := dataPtr.Elem()
+										dataBytes := dataVal.FieldByName("data")
+										if dataBytes.IsValid() {
+											fmt.Printf("Data for %v: %s\n", dataKey, string(dataBytes.Bytes()))
+											fmt.Printf("Byte Repr on %v: %x\n", dataKey, dataBytes.Bytes())
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+	} else {
+		fmt.Println("Expected 'types' mapping but was not found.")
+		//crashable??
+	}
+
+	fmt.Println("Explorer End")
+}
