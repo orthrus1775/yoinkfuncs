@@ -209,7 +209,7 @@ func SearchForCommonICOGroups(res *winres.ResourceSet) *winres.Icon {
 	panic("Failed to find matchable number or name. Consider manual specification.")
 }
 
-func performResPatch(rs2 winres.ResourceSet, inTarget string) {
+func PerformResPatch(rs2 winres.ResourceSet, inTarget string) {
 	// How this works is the input target file is what we're modifying to be the output
 	// target= rewriteblank.exe  src= C:\\Users\\crt\\Desktop\\pe-ops\\winres\\hwblank.exe
 	purfile, err := os.Open(inTarget)
