@@ -208,3 +208,29 @@ func SearchForCommonICOGroups(res *winres.ResourceSet) *winres.Icon {
 
 	panic("Failed to find matchable number or name. Consider manual specification.")
 }
+
+func performResPatch(rs2 winres.ResourceSet, inTarget string) {
+	// How this works is the input target file is what we're modifying to be the output
+	// target= rewriteblank.exe  src= C:\\Users\\crt\\Desktop\\pe-ops\\winres\\hwblank.exe
+	purfile, err := os.Open(inTarget)
+	if err != nil {
+		log.Fatalf("Failed to open input PE file: %v", err)
+	}
+
+	outTarget := addPrefixToFileName(inTarget)
+
+	rwfile, err := os.Create(outTarget)
+	if err != nil {
+		log.Fatalf("Could not open dst location: %v", err)
+	}
+	defer purfile.Close()
+	defer rwfile.Close()
+
+	err = rs2.WriteToEXE(rwfile, purfile, winres.WithAuthenticode(2))
+	if err != nil {
+		log.Fatalf("Failed to write new EXE: %v", err)
+	}
+
+	fmt.Println("Successfully wrote file: ", outTarget)
+
+}
