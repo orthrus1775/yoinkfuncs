@@ -46,6 +46,15 @@ func addPrefixToFileName(fp string) string {
 	return filepath.Join(dir, newBaseName)
 }
 
+func GetSpecRawResTypeData(rs1 *winres.ResourceSet, typeID int) []byte {
+
+	unsafeCheckResTypeIdx(rs1, typeID)
+	//refactor to to err checks?
+	return unsafeGetResData(rs1, typeID)
+
+}
+
+
 func RequestNewFileInfoForm(fvi FVInfo) FVInfo {
 
 		form := huh.NewForm(
