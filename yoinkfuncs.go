@@ -245,6 +245,61 @@ func modupFileVersionData(ogfvi FVInfo) FVInfo {
 	return ogfvi
 }
 
+
+func GetSrcFileVersionData(jdata []byte) FVInfo {
+
+	// Reexpports
+	type FixedInfo struct {
+		FileVersion    string `json:"file_version"`
+		ProductVersion string `json:"product_version"`
+	}
+
+	type LocaleInfo struct {
+		CompanyName     string `json:"CompanyName"`
+		FileDescription string `json:"FileDescription"`
+		FileVersion     string `json:"FileVersion"`
+		InternalName    string `json:"InternalName"`
+		OriginalFilename string `json:"OriginalFilename"`
+		ProductName     string `json:"ProductName"`
+		ProductVersion  string `json:"ProductVersion"`
+		LegalCopyright  string `json:"LegalCopyright"`
+		LegalTrademark	string `json:"LegalTrademark"`
+		Language		string `json:"Language"`
+		Comments		string `json:"Comments"`
+	}
+
+	type Data struct {
+		Fixed FixedInfo           `json:"fixed"`
+		Info  map[string]LocaleInfo `json:"info"`
+	}
+
+	///////////////////
+
+	var dstruct Data
+	json.Unmarshal(jdata, &dstruct)
+
+	enUS_info, ok := dstruct.Info["0409"]
+	if !ok {
+		log.Fatal("The PE doesnt have an en-US string table. Suggest using manual tool")	
+	}
+
+	var fvi FVInfo
+	fvi.CompanyName =  enUS_info.CompanyName
+	fvi.FileDescription = enUS_info.FileDescription
+	fvi.FileVersion = enUS_info.FileVersion
+	fvi.InternalName = enUS_info.InternalName
+	fvi.ProductName = enUS_info.ProductName
+	fvi.ProductVersion = enUS_info.ProductVersion
+	fvi.OriginalFilename = enUS_info.OriginalFilename
+
+	fvi.Comments = enUS_info.Comments
+	fvi.Copyright = enUS_info.LegalCopyright
+	fvi.Trademark = enUS_info.LegalTrademark
+
+	return fvi
+}
+
+
 func dbgFVIColorPrint(fvi FVInfo) {
 
 	color.Green("FVI Info for CompanyName = %s",  fvi.CompanyName                    )
