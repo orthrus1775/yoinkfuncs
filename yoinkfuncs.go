@@ -167,3 +167,44 @@ func LoadAnIconResourceFromPath(path string) *winres.ResourceSet {
 	return res
 
 }
+
+// Purely a stop-gap function. Will need to port in my PE parser in future update. As of now will only work with "our current" appset.
+func SearchForCommonICOGroups(res *winres.ResourceSet) *winres.Icon {
+
+	var icos_names []string = []string{"IDI_APPLICATION", "IDR_MAINFRAME", "IDR_MAINFRAME_2", "IDR_MAINFRAME_3", "IDR_MAINFRAME_4"}
+	var icos_numbs []int  = []int{
+		1,
+		2,3,4,
+		5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 107, 108, 
+		184,
+		201, 
+		1300, 1301, 1302, 1303, 1304, 1305, 1306, 1307,1308, 1309, 1310, 1311, 1312, 1313}
+	fmt.Println("Performing a search for known common icon groups.")
+
+	
+	for _, e := range icos_numbs {
+		ico, err := res.GetIcon(winres.ID(e))
+		if err != nil {
+			//fmt.Printf("Fail match lookup of %d.\n", e)
+			continue
+		} else if err == nil {
+			fmt.Printf("ID MATCHED on lookup of %d.\n", e)
+			return ico
+		}
+	}
+		
+	fmt.Println("No Number Matches. Performing Name Lookups")
+
+	for _, e := range icos_names {
+		ico, err := res.GetIcon(winres.Name(e))
+		if err != nil {
+			//fmt.Printf("Fail match lookup of %s.\n", e)
+			continue
+		} else if err == nil {
+			fmt.Printf("NAME MATCHED on lookup of %s.\n", e)
+			return ico
+		}
+	}
+
+	panic("Failed to find matchable number or name. Consider manual specification.")
+}
