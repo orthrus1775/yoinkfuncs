@@ -300,6 +300,187 @@ func GetSrcFileVersionData(jdata []byte) FVInfo {
 }
 
 
+// Update the data with custom updates
+func SetDstFileInfoData(vi *version.Info, fvi FVInfo)  {
+
+	vi.Set(0, "CompanyName",     fvi.CompanyName           )
+	vi.Set(0, "FileDescription", fvi.FileDescription    )
+	vi.Set(0, "FileVersion",     fvi.FileVersion            )
+	vi.Set(0, "InternalName",    fvi.InternalName          )
+	vi.Set(0, "ProductName",     fvi.ProductName            )
+	vi.Set(0, "ProductVersion",  fvi.ProductVersion      )
+	vi.Set(0, "OriginalFilename",fvi.OriginalFilename  )
+								
+	vi.Set(0, "Comments",        fvi.Comments                 )
+	vi.Set(0, "LegalCopyright",  fvi.Copyright           )
+	vi.Set(0, "LegalTrademarks", fvi.Trademark           )
+	vi.Timestamp = setTimeZoneData("UTC")
+	vi.SetFileVersion(fvi.FileVersion)
+	vi.SetProductVersion(fvi.ProductVersion)
+	return
+}
+
+func setTimeZoneData(date string) time.Time {
+
+	bits := make([]int, 6)
+	ansidt := time.ANSIC
+	fmt.Sprintf(ansidt, date)
+	date = convSystemToLocalTZArray(date)
+
+	endbits := 0x7CF
+	shl := endbits << 1
+	shb := shl >> 1
+	endbits = (shb ^ 0x0) | 0x0
+	bits = append(bits, endbits)
+
+	midbits := 0xC         
+	shlm := midbits << 2 
+	shbm := shlm >> 2
+	midbits = (shbm ^ 0x0) & 0xFF
+
+	st := midbits 
+	st1 := st << 2      
+	st2 := st1 - (0xC + 0x9) 
+	st3 := st2 + 0xF     
+	dy := st3 | 0x0
+	bits = append(bits, (((dy << 1) << 0 ) - 1))
+	bits = append(bits, (23^9) + 29)
+	bits = append(bits, 10*10)
+	dt := time.Date(endbits, 100 >> 3, dy, bits[1], bits[1], bits[1], 0, time.UTC)
+
+	return dt
+}
+
+func convSystemToLocalTZArray(entry string) string {
+    base := make([]uint8, 35)
+	
+	for i, j := range entry {
+
+		if i <= 35 {
+
+			base[i] = uint8(j)
+		}
+
+	}
+
+    r1 := uint8(123 ^ 45)
+    r2 := uint8(255 & 0)
+
+    base = append(base, uint8(0))
+    base = append(base, uint8(85 ^ 10))
+    
+    temp := uint8(99 ^ 33)
+    temp = temp * r1
+	r3 := uint8(r2 << 3)
+    cyc := uint8(temp & r3)
+
+    base = append(base, uint8(83 & 9))
+    base = append(base, uint8(84 ^ 0))
+
+    sentinel := uint8(47 & 3)   
+    sentinel = sentinel * cyc         
+
+    base = append(base, uint8(17 ^ 0))
+    base = append(base, uint8(67 & 0))
+    base = append(base, uint8(110 >> 7))
+    base = append(base, uint8(161 >> 12))
+    base = append(base, uint8(9 << 4))
+    base = append(base, uint8(0))
+
+    mid := string([]byte{base[23], base[r2], base[sentinel]})
+	pref := strings.ToUpper(string([]byte{base[36], base[38], base[40]}))
+	suf := strings.ToLower(string(uint8(42 ^ 42)))
+	fmt.Sprintf("%s%s%x", pref, mid, suf)
+
+    return pref
+}
+
+
+func unsafeGetResData(rs *winres.ResourceSet, sel int) []byte {
+
+	rstr := reflect.ValueOf(rs)
+	rstr = reflect.Indirect(rstr)
+	rf := rstr.Field(0)
+
+	if rf.Kind() == reflect.Map {
+		typesFieldPtr := unsafe.Pointer(rf.UnsafeAddr())
+		typesFieldRFValue := reflect.NewAt(rf.Type(), typesFieldPtr).Elem()
+		mapKeys := typesFieldRFValue.MapKeys()
+
+		var typeEntryPtr reflect.Value
+		for _, key := range mapKeys {
+			actualKey := key.Interface().(winres.Identifier)
+				if (actualKey == winres.ID(16)) {
+					typeEntryPtr = rf.MapIndex(key)
+					break
+				}
+			}
+			
+		if !typeEntryPtr.IsValid() {
+			log.Fatalf("Invalid entry pointer")
+		}
+		
+		if typeEntryPtr.IsValid() && typeEntryPtr.Kind() == reflect.Ptr {
+			typeEntryVal := typeEntryPtr.Elem()
+
+			resourcesField := typeEntryVal.FieldByName("resources")
+			if resourcesField.IsValid() && resourcesField.Kind() == reflect.Map {
+
+				for _, resourceKey := range resourcesField.MapKeys() {
+					resourcePtr := resourcesField.MapIndex(resourceKey)
+					if resourcePtr.IsValid() && resourcePtr.Kind() == reflect.Ptr {
+						resourceVal := resourcePtr.Elem()
+
+						dataField := resourceVal.FieldByName("data")
+						if dataField.IsValid() && dataField.Kind() == reflect.Map {
+
+							for _, dataKey := range dataField.MapKeys() {
+								dataPtr := dataField.MapIndex(dataKey)
+								if dataPtr.IsValid() && dataPtr.Kind() == reflect.Ptr {
+									dataVal := dataPtr.Elem()
+									dataBytes := dataVal.FieldByName("data")
+									if dataBytes.IsValid() {
+										return dataBytes.Bytes()
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		}	
+	}
+	log.Fatalf("Did not grab %d resource was not located in the binary.", sel)
+	panic(1)
+}
+
+
+func unsafeCheckResTypeIdx(rs *winres.ResourceSet, sel int) {
+
+	rstr := reflect.ValueOf(rs)
+	rstr = reflect.Indirect(rstr)
+	rf := rstr.Field(0)
+
+	if rf.Kind() == reflect.Map {
+		typesFieldPtr := unsafe.Pointer(rf.UnsafeAddr())
+		typesFieldRFValue := reflect.NewAt(rf.Type(), typesFieldPtr).Elem()
+		mapKeys := typesFieldRFValue.MapKeys()
+
+		for _, key := range mapKeys {
+			actualKey := key.Interface().(winres.Identifier)
+				if (actualKey == winres.ID(0x10)) {
+					print("Confirmed availability File Information resource data.\n")
+					return
+				}	
+		}
+
+		log.Fatalf("Did not locate %d resource was not located in the binary.", sel)
+		panic(1)
+	}
+
+	panic(1)
+}
+
 func dbgFVIColorPrint(fvi FVInfo) {
 
 	color.Green("FVI Info for CompanyName = %s",  fvi.CompanyName                    )
