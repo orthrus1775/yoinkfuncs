@@ -244,3 +244,44 @@ func modupFileVersionData(ogfvi FVInfo) FVInfo {
 	ogfvi.InternalName = "IDontWannaHearIt.exe"
 	return ogfvi
 }
+
+func dbgFVIColorPrint(fvi FVInfo) {
+
+	color.Green("FVI Info for CompanyName = %s",  fvi.CompanyName                    )
+	color.Green("FVI Info for FileDescription = %s", fvi.FileDescription             )
+	color.Green("FVI Info for FileVersion = %s", fvi.FileVersion                     )
+	color.Green("FVI Info for InternalName = %s", fvi.InternalName                   )
+	color.Green("FVI Info for ProductName = %s", fvi.ProductName                     )
+	color.Green("FVI Info for ProductVersion = %s", fvi.ProductVersion               )
+	color.Green("FVI Info for OriginalFilename = %s", fvi.OriginalFilename           )																					 
+	color.Green("FVI Info for Comments = %s", fvi.Comments                           )
+	color.Green("FVI Info for Copyright = %s", fvi.Copyright                    )
+	color.Green("FVI Info for Trademark = %s", fvi.Trademark                    )
+
+}
+
+func dbgJSONPrettyPrint(vi version.Info) {
+
+		jsondata, _ := vi.MarshalJSON()
+		fmt.Printf("%s", jsondata)
+		fmt.Printf("Hex JSON: %x\n\n", jsondata)
+		var jb bytes.Buffer
+		json.Indent(&jb, jsondata, "", "  ")
+		fmt.Printf("%s \n", jb)
+
+
+		// Alternatively could initiate return to be used later for multiline editing.
+		// return jb
+
+}
+
+func dbgRawUnMarshPrint(vi version.Info) {
+
+	var unmarshjson []byte
+	err := vi.UnmarshalJSON(unmarshjson)
+	if err != nil {
+		log.Fatalf("Unmarshal out err. %v", err)
+	}
+	fmt.Printf("Unmarshed: %x\n", 	string(unmarshjson))
+
+}
