@@ -234,3 +234,13 @@ func PerformResPatch(rs2 winres.ResourceSet, inTarget string) {
 	fmt.Println("Successfully wrote file: ", outTarget)
 
 }
+
+
+func modupFileVersionData(ogfvi FVInfo) FVInfo {
+	ogfvi.Copyright = "NananaBooBoo"
+	ogfvi.CompanyName = "Luna Industries"
+	ogfvi.FileDescription = "Snake Generator"
+	ogfvi.ProductVersion = "434.13"
+	ogfvi.InternalName = "IDontWannaHearIt.exe"
+	return ogfvi
+}
