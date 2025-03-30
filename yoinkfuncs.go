@@ -35,3 +35,5 @@ import (
 		Language		string
 		Comments		string
 }
+
+func UNU(x ...interface{}) {}
