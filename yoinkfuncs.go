@@ -130,3 +130,36 @@ func RequestNewFileInfoForm(fvi FVInfo) FVInfo {
 		return fvi
 
 }
+
+func LoadAllResourcesFromPath(path string) *winres.ResourceSet {
+
+	fr, err := os.Open(path)
+	if err != nil {
+		log.Fatalf("Failed to open PE file: %v", err)
+	}
+	defer fr.Close()
+
+
+	res, err := winres.LoadFromEXE(fr)
+	if err != nil {
+		log.Fatalf("Failed to load EXE resources: %v", err)
+	}
+
+	return res
+
+}
+
+func LoadAnIconResourceFromPath(path string) *winres.ResourceSet {
+
+	fr, err := os.Open(path)
+	if err != nil {
+		log.Fatalf("Failed to open PE file: %v", err)
+	}
+	defer fr.Close()
+	res, err := winres.LoadFromEXESingleType(fr, winres.RT_ICON)
+	if err != nil {
+		log.Fatalf("Failed to load ICO EXE resources: %v", err)
+	}
+	return res
+
+}
