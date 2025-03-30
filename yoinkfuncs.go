@@ -36,6 +36,7 @@ import (
 		Comments		string
 }
 
+
 func UNU(x ...interface{}) {}
 
 func addPrefixToFileName(fp string) string {
@@ -156,10 +157,13 @@ func LoadAnIconResourceFromPath(path string) *winres.ResourceSet {
 		log.Fatalf("Failed to open PE file: %v", err)
 	}
 	defer fr.Close()
+
+
 	res, err := winres.LoadFromEXESingleType(fr, winres.RT_ICON)
 	if err != nil {
 		log.Fatalf("Failed to load ICO EXE resources: %v", err)
 	}
+
 	return res
 
 }
