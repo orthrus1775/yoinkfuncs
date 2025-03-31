@@ -54,7 +54,6 @@ func GetSpecRawResTypeData(rs1 *winres.ResourceSet, typeID int) []byte {
 
 }
 
-
 func RequestNewFileInfoForm(fvi FVInfo) FVInfo {
 
 	form := huh.NewForm(
