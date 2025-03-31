@@ -18,6 +18,8 @@ import (
 	"github.com/tc-hib/winres/version"
 )
 
+const PKGVERSION = 0.1
+
 // Required Entries
 // Ref: https://learn.microsoft.com/en-us/windows/win32/menurc/versioninfo-resource
 	type FVInfo struct {
