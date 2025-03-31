@@ -255,12 +255,13 @@ func modupFileVersionData(ogfvi FVInfo) FVInfo {
 	return ogfvi
 }
 
-func GetRawVersionInfo(rawfi []byte) any {
+func GetRawVersionInfo(rawfi []byte) *version.Info {
 	vi, err := version.FromBytes(rawfi)
 	if err != nil {
 		log.Fatalf("Failed to marshal out the File Information. %v", err)
 
 	}
+	
 	return vi
 }
 
