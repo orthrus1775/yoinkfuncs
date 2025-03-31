@@ -253,6 +253,14 @@ func modupFileVersionData(ogfvi FVInfo) FVInfo {
 	return ogfvi
 }
 
+func GetRawVersionInfo(rawfi []byte) any {
+	vi, err := version.FromBytes(rawfi)
+	if err != nil {
+		log.Fatalf("Failed to marshal out the File Information. %v", err)
+
+	}
+	return vi
+}
 
 func GetSrcFileVersionData(jdata []byte) FVInfo {
 
