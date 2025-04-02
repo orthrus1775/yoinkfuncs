@@ -19,6 +19,7 @@ import (
 )
 
 const PKGVERSION = 0.1
+const WINICON = winres.RT_ICON
 
 // Required Entries
 // Ref: https://learn.microsoft.com/en-us/windows/win32/menurc/versioninfo-resource
@@ -261,7 +262,7 @@ func GetRawVersionInfo(rawfi []byte) *version.Info {
 		log.Fatalf("Failed to marshal out the File Information. %v", err)
 
 	}
-	
+
 	return vi
 }
 
