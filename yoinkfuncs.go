@@ -264,6 +264,25 @@ func GetRawVersionInfo(rawfi []byte) *version.Info {
 	}
 
 	return vi
+}  
+
+func GetVersionInfoAsJSON(vi interface{}) []byte {
+	// Cast the interface{} back to version.Info
+	// Since GetRawVersionInfo returns 'any', we need to type assert
+	versionInfo, ok := vi.(version.Info)
+	if !ok {
+		log.Fatalf("Failed to convert interface{} to version.Info")
+		return nil
+	}
+	
+	// Marshal to JSON using the existing MarshalJSON method
+	jsonData, err := versionInfo.MarshalJSON()
+	if err != nil {
+		log.Fatalf("Failed to marshal version info to JSON: %v", err)
+		return nil
+	}
+	
+	return jsonData
 }
 
 func GetSrcFileVersionData(jdata []byte) FVInfo {
