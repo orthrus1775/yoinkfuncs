@@ -1,4 +1,4 @@
-module github.com/orthrus1775/yoinkfuncs.git
+module github.com/orthrus1775/yoinkfuncs
 
 go 1.21
 
