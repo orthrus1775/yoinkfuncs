@@ -2,6 +2,7 @@ module github.com/orthrus1775/yoinkfuncs
 
 go 1.21
 
+
 require github.com/charmbracelet/huh v0.6.0
 
 require (
