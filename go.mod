@@ -1,4 +1,4 @@
-module github.com/Savsanta/yoinkfuncs
+module github.com/orthrus1775/yoinkfuncs.git
 
 go 1.21
 
